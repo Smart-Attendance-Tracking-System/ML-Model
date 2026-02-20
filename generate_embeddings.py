@@ -29,7 +29,11 @@ for person_name in os.listdir(DATASET_PATH):
 
     if len(person_embeddings) > 0:
         mean_embedding = np.mean(person_embeddings, axis=0)
-        embeddings_db[person_name] = mean_embedding
+        mean_embedding = mean_embedding / np.linalg.norm(mean_embedding)
+        embeddings_db[person_name] = {
+            "embedding": mean_embedding,
+            "count": len(person_embeddings)
+        }
     
         print(f"{person_name} embeddings generated ({len(person_embeddings)} images)")
 

@@ -64,6 +64,34 @@ class FaceEngine:
             return None
 
         return self.extract_embedding(img, min_det_score)
-    
-    def extract_from_frame(self, frame, min_det_score=0.8):
-        return self.extract_embedding(frame, min_det_score)
+
+    def extract_from_frame(self, frame):
+
+        faces = self.app.get(frame)
+
+        if len(faces) == 0:
+            return None
+
+        results = []
+
+        for face in faces:
+            embedding = face.embedding
+            embedding = embedding / np.linalg.norm(embedding)
+
+            landmarks = None
+
+            if hasattr(face, "landmark_3d_68") and face.landmark_3d_68 is not None:
+                landmarks = face.landmark_3d_68
+            elif hasattr(face, "landmark_2d_106") and face.landmark_2d_106 is not None:
+                landmarks = face.landmark_2d_106
+            else:
+                print("⚠️ No landmarks found for this face")
+
+            results.append({
+                "bbox": face.bbox, 
+                "embedding": embedding, 
+                "landmarks": landmarks,
+                "yaw": face.pose[1]  # Add this line
+            })
+
+        return results
